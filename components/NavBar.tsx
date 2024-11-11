@@ -4,6 +4,8 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { Button } from './ui/button'
 import { Menu, X } from 'lucide-react'
+import { SignedIn, SignInButton } from '@clerk/nextjs'
+import { SignedOut, SignOutButton } from '@clerk/clerk-react'
 
 export function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -26,7 +28,12 @@ export function NavBar() {
             <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4">
               Contact
             </Link>
-            <Button className="ml-4" size="sm">Get Started</Button>
+            <SignedIn>
+            <Button asChild className="ml-4" size="sm"><SignOutButton></SignOutButton></Button>
+            </SignedIn>
+            <SignedOut>
+             <Button asChild><SignInButton></SignInButton></Button>
+            </SignedOut>
           </nav>
           <Button
             variant="ghost"
