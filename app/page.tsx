@@ -1,101 +1,192 @@
-import Image from "next/image";
 
-export default function Home() {
+import Image from 'next/image'
+import Link from 'next/link'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { ChevronRight, Calendar, Car, CreditCard, MessageCircle } from 'lucide-react'
+
+export default function Homepage() {
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
+      
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                    Streamline Your Car Rental Business
+                  </h1>
+                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                    All-in-one management tool for car rental businesses—track bookings, manage payments, and streamline operations.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Button className='font-bold' size="lg">
+                    Try It Free
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Button className='font-bold' size="lg" variant="outline">
+                    Learn More
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-center lg:order-last">
+                <Image
+                  alt="Hero"
+                  className="aspect-video overflow-hidden rounded-xl object-cover object-center w-full h-auto"
+                  height="550"
+                  src="/placeholder.svg"
+                  width="550"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Key Features</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <Card>
+                <CardContent className="flex flex-col items-center space-y-2 p-6">
+                  <Calendar className="h-12 w-12 mb-2" />
+                  <h3 className="text-xl font-bold">Booking Management</h3>
+                  <p className="text-sm text-center text-muted-foreground">Keep track of reservations and manage customer details.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="flex flex-col items-center space-y-2 p-6">
+                  <Car className="h-12 w-12 mb-2" />
+                  <h3 className="text-xl font-bold">Fleet Management</h3>
+                  <p className="text-sm text-center text-muted-foreground">Easily add and manage vehicle listings.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="flex flex-col items-center space-y-2 p-6">
+                  <CreditCard className="h-12 w-12 mb-2" />
+                  <h3 className="text-xl font-bold">Payment Integration</h3>
+                  <p className="text-sm text-center text-muted-foreground">Streamline payments and invoicing.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="flex flex-col items-center space-y-2 p-6">
+                  <MessageCircle className="h-12 w-12 mb-2" />
+                  <h3 className="text-xl font-bold">Customer Support Tools</h3>
+                  <p className="text-sm text-center text-muted-foreground">Provide communication tools for customer queries.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">How It Works</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex flex-col items-center space-y-2 border-t pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">1</div>
+                <h3 className="text-xl font-bold text-center">Sign up for an account</h3>
+              </div>
+              <div className="flex flex-col items-center space-y-2 border-t pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">2</div>
+                <h3 className="text-xl font-bold text-center">Add your vehicles</h3>
+              </div>
+              <div className="flex flex-col items-center space-y-2 border-t pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">3</div>
+                <h3 className="text-xl font-bold text-center">Start managing bookings</h3>
+              </div>
+              <div className="flex flex-col items-center space-y-2 border-t pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">4</div>
+                <h3 className="text-xl font-bold text-center">Track payments and reports</h3>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Customer Testimonials</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardContent className="flex flex-col space-y-2 p-6">
+                  <p className="text-sm text-muted-foreground">&quot;This software has revolutionized how we manage our rentals. Highly recommended!&quot;</p>
+                  <p className="font-semibold">- John Doe, ABC Rentals</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="flex flex-col space-y-2 p-6">
+                  <p className="text-sm text-muted-foreground">&quot;Easy to use and has all the features we need. Great customer support too!&quot;</p>
+                  <p className="font-semibold">- Jane Smith, XYZ Cars</p>
+                </CardContent>
+              </Card>
+              <Card className="sm:col-span-2 lg:col-span-1">
+                <CardContent className="flex flex-col space-y-2 p-6">
+                  <p className="text-sm text-muted-foreground">&quot;Streamlined our operations and increased our efficiency. A game-changer!&quot;</p>
+                  <p className="font-semibold">- Mike Johnson, Fast Wheels</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Pricing</h2>
+            <div className="flex justify-center">
+              <Card className="w-full max-w-sm">
+                <CardContent className="flex flex-col items-center space-y-4 p-6">
+                  <h3 className="text-2xl font-bold">Start Free Trial</h3>
+                  <p className="text-center text-muted-foreground">Experience all features for 14 days</p>
+                  <Button size="lg" className="w-full">
+                    Get Started
+                  </Button>
+                  <Link href="#" className="text-sm underline">
+                    Compare plans
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Benefits</h2>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <li className="flex items-center space-x-2">
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">Save time with automated booking management</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">Reduce errors with integrated payment systems</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">Improve customer satisfaction with efficient operations</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">Get insights with comprehensive reporting tools</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">Scale your business with ease</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">Access your data from anywhere, anytime</span>
+              </li>
+            </ul>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      
     </div>
-  );
+  )
 }
