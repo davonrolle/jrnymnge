@@ -45,7 +45,7 @@ export default function PricingPage() {
       name: "Professional",
       description: "For mid-sized rental businesses needing more tools",
       monthlyPrice: 99,
-      yearlyPrice: 1069,
+      yearlyPrice: 1070,
       features: [
         "Up to 20 vehicles",
         "Advanced booking management",
