@@ -26,7 +26,7 @@ export default function PricingPage() {
       name: "Basic",
       description: "For small or individual rental businesses",
       monthlyPrice: 49,
-      yearlyPrice: 529,
+      yearlyPrice: 528,
       features: [
         "Up to 5 vehicles",
         "Basic booking management",
