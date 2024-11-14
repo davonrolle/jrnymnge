@@ -123,7 +123,7 @@ function PricingCard({ plan, billing }: PricingCardProps) {
         <CardTitle>{plan.name}</CardTitle>
         <CardDescription>{plan.description}</CardDescription>
       </CardHeader>
-      <CardContent className="">
+      <CardContent>
         <div className="text-3xl font-bold mb-2">
           ${price}
           <span className="text-lg font-normal text-muted-foreground">

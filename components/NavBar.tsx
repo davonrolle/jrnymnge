@@ -72,7 +72,7 @@ export function NavBar() {
                 {item.label}
               </Link>
             ))}
-            <SignInButton mode="modal">
+            <SignInButton forceRedirectUrl='/dashboard' mode="modal">
               <Button size="sm">Sign in</Button>
             </SignInButton>
           </SignedOut>
@@ -153,7 +153,7 @@ export function NavBar() {
                 {item.label}
               </Link>
             ))}
-            <SignInButton mode="modal">
+            <SignInButton forceRedirectUrl="/dashboard" mode="modal">
               <Button className="w-full">Sign in</Button>
             </SignInButton>
           </SignedOut>

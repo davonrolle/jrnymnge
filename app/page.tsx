@@ -29,7 +29,7 @@ export default function Homepage() {
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
                   <Button className="font-bold" size="lg">
-                    Try It Free
+                    <Link href="/sign-up">Try It Free</Link>
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
@@ -217,7 +217,10 @@ export default function Homepage() {
                     <li>Email support</li>
                     <li>Basic analytics</li>
                   </ul>
-                  <Button size="lg" className="w-full bg-stone-700 text-white dark:hover:text-black">
+                  <Button
+                    size="lg"
+                    className="w-full bg-stone-700 text-white dark:hover:text-black"
+                  >
                     Get Started
                   </Button>
                   <Link
@@ -250,7 +253,10 @@ export default function Homepage() {
                     <li>Financial reports</li>
                     <li>Live chat support</li>
                   </ul>
-                  <Button size="lg" className="w-full bg-stone-700 text-white dark:hover:text-black">
+                  <Button
+                    size="lg"
+                    className="w-full bg-stone-700 text-white dark:hover:text-black"
+                  >
                     Get Started
                   </Button>
                   <Link
@@ -283,7 +289,10 @@ export default function Homepage() {
                     <li>Dedicated support rep</li>
                     <li>Priority support</li>
                   </ul>
-                  <Button size="lg" className="w-full bg-stone-700 text-white dark:hover:text-black">
+                  <Button
+                    size="lg"
+                    className="w-full bg-stone-700 text-white dark:hover:text-black"
+                  >
                     Get Started
                   </Button>
                   <Link
