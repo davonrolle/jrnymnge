@@ -215,25 +215,25 @@ export default function DashboardOverview() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/fleet-management" passHref>
+            <Link href="/dashboard/fleet" passHref>
               <Button variant="outline" className="w-full justify-between">
                 Fleet Management
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/booking-management" passHref>
+            <Link href="/dashboard/bookings" passHref>
               <Button variant="outline" className="w-full justify-between">
                 Booking Management
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/customer-management" passHref>
+            <Link href="/dashboard/customers" passHref>
               <Button variant="outline" className="w-full justify-between">
                 Customer Management
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/reports" passHref>
+            <Link href="/dashboard/reports" passHref>
               <Button variant="outline" className="w-full justify-between">
                 Reports & Analytics
                 <ChevronRight className="ml-2 h-4 w-4" />

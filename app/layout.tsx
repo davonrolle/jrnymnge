@@ -42,7 +42,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <NavBar />
-          <div className="pb-14">
+          <div className="pb-36">
           {children}
           </div>
           <div className="sticky bottom-0 w-full">

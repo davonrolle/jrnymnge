@@ -19,7 +19,7 @@ export default function Homepage() {
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  <h1 className="text-3xl text-center font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Streamline Your Car Rental Business
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
@@ -27,13 +27,18 @@ export default function Homepage() {
                     bookings, manage payments, and streamline operations.
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
                   <Button className="font-bold" size="lg">
                     Try It Free
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <Button className="font-bold" size="lg" variant="outline">
-                    Learn More
+                  <Button
+                    asChild
+                    className="font-bold dark:bg-stone-800 dark:hover:bg-stone-700"
+                    size="lg"
+                    variant="outline"
+                  >
+                    <Link href="/features">Learn More</Link>
                   </Button>
                 </div>
               </div>
@@ -181,80 +186,117 @@ export default function Homepage() {
           </div>
         </section>
 
-        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 flex justify-center">
-  <div className="container px-4 md:px-6">
-    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Pricing</h2>
-    <div className="flex flex-wrap justify-center gap-8">
-      {/* Basic Plan - Silver */}
-      <Card className="w-full sm:max-w-xs md:max-w-sm lg:max-w-md bg-gray-200 border border-gray-300">
-        <CardContent className="flex flex-col items-center space-y-4 p-6">
-          <h3 className="text-2xl font-bold text-gray-800">Start Free Trial</h3>
-          <p className="text-center text-gray-600">Experience all features for 14 days</p>
-          <div className="text-3xl font-bold text-gray-800 mb-2">${49}<span className="text-lg font-normal text-gray-600">/mo</span></div>
-          <ul className="space-y-2 mb-4 text-gray-700">
-            <li>Up to 5 vehicles</li>
-            <li>Basic booking management</li>
-            <li>Customer database</li>
-            <li>Email support</li>
-            <li>Basic analytics</li>
-          </ul>
-          <Button size="lg" className="w-full bg-stone-700 text-white">
-            Get Started
-          </Button>
-          <Link href="/pricing" className="text-sm underline text-gray-700">
-            Compare plans
-          </Link>
-        </CardContent>
-      </Card>
+        <section
+          id="pricing"
+          className="w-full py-12 md:py-24 lg:py-32 flex justify-center"
+        >
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+              Pricing
+            </h2>
+            <div className="flex flex-wrap justify-center gap-8">
+              {/* Basic Plan - Silver */}
+              <Card className="w-full sm:max-w-xs md:max-w-sm lg:max-w-md bg-gray-200 border border-gray-300">
+                <CardContent className="flex flex-col items-center space-y-4 p-6">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    Start Free Trial
+                  </h3>
+                  <p className="text-center text-gray-600">
+                    Experience all features for 14 days
+                  </p>
+                  <div className="text-3xl font-bold text-gray-800 mb-2">
+                    ${49}
+                    <span className="text-lg font-normal text-gray-600">
+                      /mo
+                    </span>
+                  </div>
+                  <ul className="space-y-2 mb-4 text-gray-700 text-center">
+                    <li>Up to 5 vehicles</li>
+                    <li>Basic booking management</li>
+                    <li>Customer database</li>
+                    <li>Email support</li>
+                    <li>Basic analytics</li>
+                  </ul>
+                  <Button size="lg" className="w-full bg-stone-700 text-white dark:hover:text-black">
+                    Get Started
+                  </Button>
+                  <Link
+                    href="/pricing"
+                    className="text-sm underline text-gray-700"
+                  >
+                    Compare plans
+                  </Link>
+                </CardContent>
+              </Card>
 
-      {/* Professional Plan - Gold */}
-      <Card className="w-full sm:max-w-xs md:max-w-sm lg:max-w-md bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 border border-yellow-400">
-        <CardContent className="flex flex-col items-center space-y-4 p-6">
-          <h3 className="text-2xl font-bold text-white">Professional Plan</h3>
-          <p className="text-center text-white">For mid-sized rental businesses needing more tools</p>
-          <div className="text-3xl font-bold text-white mb-2">${99}<span className="text-lg font-normal text-white">/mo</span></div>
-          <ul className="space-y-2 mb-4 text-white">
-            <li>Up to 20 vehicles</li>
-            <li>Advanced booking management</li>
-            <li>CRM tools</li>
-            <li>Customer insights</li>
-            <li>Financial reports</li>
-            <li>Live chat support</li>
-          </ul>
-          <Button size="lg" className="w-full bg-stone-700 text-white">
-            Get Started
-          </Button>
-          <Link href="/pricing" className="text-sm underline text-white">
-            Compare plans
-          </Link>
-        </CardContent>
-      </Card>
+              {/* Professional Plan - Gold */}
+              <Card className="w-full sm:max-w-xs md:max-w-sm lg:max-w-md bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 border border-yellow-400">
+                <CardContent className="flex flex-col items-center space-y-4 p-6">
+                  <h3 className="text-2xl font-bold text-white">
+                    Professional Plan
+                  </h3>
+                  <p className="text-center text-white">
+                    For mid-sized rental businesses needing more tools
+                  </p>
+                  <div className="text-3xl font-bold text-white mb-2">
+                    ${99}
+                    <span className="text-lg font-normal text-white">/mo</span>
+                  </div>
+                  <ul className="space-y-2 mb-4 text-white text-center">
+                    <li>Up to 20 vehicles</li>
+                    <li>Advanced booking management</li>
+                    <li>CRM tools</li>
+                    <li>Customer insights</li>
+                    <li>Financial reports</li>
+                    <li>Live chat support</li>
+                  </ul>
+                  <Button size="lg" className="w-full bg-stone-700 text-white dark:hover:text-black">
+                    Get Started
+                  </Button>
+                  <Link
+                    href="/pricing"
+                    className="text-sm underline text-white"
+                  >
+                    Compare plans
+                  </Link>
+                </CardContent>
+              </Card>
 
-      {/* Enterprise Plan - Purple */}
-      <Card className="w-full sm:max-w-xs md:max-w-sm lg:max-w-md bg-gradient-to-r from-purple-500 to-purple-700 border border-purple-600">
-        <CardContent className="flex flex-col items-center space-y-4 p-6">
-          <h3 className="text-2xl font-bold text-white">Enterprise Plan</h3>
-          <p className="text-center text-white">For larger businesses or companies with extensive fleets</p>
-          <div className="text-3xl font-bold text-white mb-2">${249}<span className="text-lg font-normal text-white">/mo</span></div>
-          <ul className="space-y-2 mb-4 text-white">
-            <li>Unlimited vehicles</li>
-            <li>Full feature access</li>
-            <li>Custom solutions</li>
-            <li>Advanced analytics</li>
-            <li>Dedicated support rep</li>
-            <li>Priority support</li>
-          </ul>
-          <Button size="lg" className="w-full bg-stone-700 text-white">
-            Get Started
-          </Button>
-          <Link href="/pricing" className="text-sm underline text-white">
-            Compare plans
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
-  </div>
-</section>
+              {/* Enterprise Plan - Purple */}
+              <Card className="w-full sm:max-w-xs md:max-w-sm lg:max-w-md bg-gradient-to-r from-purple-500 to-purple-700 border border-purple-600">
+                <CardContent className="flex flex-col items-center space-y-4 p-6">
+                  <h3 className="text-2xl font-bold text-white">
+                    Enterprise Plan
+                  </h3>
+                  <p className="text-center text-white">
+                    For larger businesses or companies with extensive fleets
+                  </p>
+                  <div className="text-3xl font-bold text-white mb-2">
+                    ${249}
+                    <span className="text-lg font-normal text-white">/mo</span>
+                  </div>
+                  <ul className="space-y-2 mb-4 text-white text-center">
+                    <li>Unlimited vehicles</li>
+                    <li>Full feature access</li>
+                    <li>Custom solutions</li>
+                    <li>Advanced analytics</li>
+                    <li>Dedicated support rep</li>
+                    <li>Priority support</li>
+                  </ul>
+                  <Button size="lg" className="w-full bg-stone-700 text-white dark:hover:text-black">
+                    Get Started
+                  </Button>
+                  <Link
+                    href="/pricing"
+                    className="text-sm underline text-white"
+                  >
+                    Compare plans
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
 
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted flex justify-center">
           <div className="container px-4 md:px-6">

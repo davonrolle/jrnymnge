@@ -163,18 +163,18 @@ export default function FeaturesPage() {
         {features.map((feature) => (
           <Card key={feature.id}>
             <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
+              <CardTitle className="text-2xl justify-center flex items-center gap-2">
                 {feature.icon}
                 {feature.title}
               </CardTitle>
-              <CardDescription>{feature.description}</CardDescription>
+              <CardDescription className="text-center">{feature.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-6">
                 {feature.subFeatures.map((subFeature, index) => (
                   <Card key={index}>
                     <CardHeader>
-                      <CardTitle className="text-xl">{subFeature.title}</CardTitle>
+                      <CardTitle className="text-xl text-center">{subFeature.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p>{subFeature.description}</p>
