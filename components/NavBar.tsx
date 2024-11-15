@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Bell } from 'lucide-react';
+import { Menu, X, Bell } from "lucide-react";
 import { SignedIn, SignInButton, SignOutButton } from "@clerk/nextjs";
 import { SignedOut } from "@clerk/clerk-react";
 import { usePathname } from "next/navigation";
@@ -21,7 +21,6 @@ export function NavBar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const pathname = usePathname();
 
-  // Define the nav items based on sign-in status
   const signedOutNavItems = [
     { href: "/", label: "Home" },
     { href: "/features", label: "Features" },
@@ -38,6 +37,7 @@ export function NavBar() {
     { href: "/dashboard/customers", label: "Customers" },
     { href: "/dashboard/reports", label: "Reports" },
     { href: "/dashboard/settings", label: "Settings" },
+    
   ];
 
   useEffect(() => {
@@ -48,7 +48,6 @@ export function NavBar() {
     setIsMobileMenuOpen(false);
   };
 
-  // Mock notifications data
   const notifications = [
     { id: 1, message: "New booking request received" },
     { id: 2, message: "Vehicle maintenance due in 3 days" },
@@ -57,10 +56,13 @@ export function NavBar() {
 
   return (
     <header className="sticky w-full top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex justify-between items-center h-16 px-4">
+      <div className=" flex justify-between items-center h-14 px-6 lg:px-72">
+        {/* JRNY logo on the left */}
         <Link href="/" className="font-bold text-xl text-primary animate-pulse">
           JRNY
         </Link>
+
+        {/* Navigation links on the right */}
         <nav className="hidden md:flex items-center space-x-1">
           <SignedOut>
             {signedOutNavItems.map((item) => (
@@ -72,30 +74,16 @@ export function NavBar() {
                 {item.label}
               </Link>
             ))}
-            <SignInButton forceRedirectUrl='/dashboard' mode="modal">
+            <SignInButton forceRedirectUrl="/dashboard" mode="modal">
               <Button size="sm">Sign in</Button>
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            {signedInNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <SignOutButton>
-              <Button variant="ghost" size="sm">
-                Sign out
-              </Button>
-            </SignOutButton>
-          </SignedIn>
-        </nav>
-        <div className="flex items-center space-x-2">
-          <SignedIn>
-            <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+          <Dialog
+              open={isNotificationsOpen}
+              onOpenChange={setIsNotificationsOpen}
+              
+            >
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
@@ -108,11 +96,16 @@ export function NavBar() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Notifications</DialogTitle>
-                  <DialogDescription>Your recent notifications</DialogDescription>
+                  <DialogDescription>
+                    Your recent notifications
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   {notifications.map((notification) => (
-                    <div key={notification.id} className="flex items-start space-x-2">
+                    <div
+                      key={notification.id}
+                      className="flex items-start space-x-2"
+                    >
                       <Bell className="h-5 w-5 mt-0.5 text-muted-foreground" />
                       <p>{notification.message}</p>
                     </div>
@@ -120,7 +113,26 @@ export function NavBar() {
                 </div>
               </DialogContent>
             </Dialog>
+            {signedInNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <SignOutButton>
+              <Button variant="destructive" size="sm">
+                Sign out
+              </Button>
+            </SignOutButton>
           </SignedIn>
+        </nav>
+
+        {/* Notifications and mobile menu toggle on small screens */}
+        <div className="flex items-center space-x-2 md:hidden">
+          
           <Button
             variant="ghost"
             size="icon"
@@ -136,6 +148,8 @@ export function NavBar() {
           </Button>
         </div>
       </div>
+
+      {/* Mobile menu */}
       <div
         className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
           isMobileMenuOpen ? "max-h-screen" : "max-h-0"

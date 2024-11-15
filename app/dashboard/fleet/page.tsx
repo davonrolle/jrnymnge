@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import Link from "next/link";
 
 // Dummy data for vehicles
 const vehicles = [
@@ -130,8 +131,9 @@ export default function FleetManagement() {
       </div>
 
       {/* Add New Vehicle Button */}
-      <Button className="w-full sm:w-auto">
-        <Plus className="mr-2 h-4 w-4" /> Add New Vehicle
+      <Button asChild className="w-full sm:w-auto">
+        <Link href='/dashboard/fleet/create'>
+        <Plus className="mr-2 h-4 w-4" /> Add New Vehicle</Link>
       </Button>
 
       {/* Fleet Overview Section */}

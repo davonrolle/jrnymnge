@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from 'next/link';
 
 // Dummy data for customers
 const customers = [
@@ -54,8 +55,10 @@ export default function CustomerManagement() {
       </div>
 
       {/* Add New Customer Button */}
-      <Button className="w-full sm:w-auto">
+      <Button asChild className="w-full sm:w-auto">
+        <Link href="/dashboard/customers/create">
         <UserPlus className="mr-2 h-4 w-4" /> Add New Customer
+        </Link>
       </Button>
 
       {/* Customer Overview Section */}

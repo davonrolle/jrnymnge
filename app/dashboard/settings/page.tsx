@@ -224,7 +224,7 @@ export default function SettingsPage() {
               <CardDescription>Manage team access and permissions</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-x-4">
                 <Label>Team Management</Label>
                 <Button variant="outline">Add Team Member</Button>
               </div>
@@ -343,7 +343,7 @@ export default function SettingsPage() {
               <CardDescription>Manage your data and privacy preferences</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-x-4">
                 <Label>Data Export</Label>
                 <Button variant="outline">Export All Data</Button>
               </div>
@@ -361,7 +361,7 @@ export default function SettingsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-x-4 space-y-2">
                 <Label>Account Deletion</Label>
                 <Button variant="destructive">Request Account Deletion</Button>
               </div>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import Link from 'next/link'
 
 // Dummy data for bookings
 const bookings = [
@@ -57,8 +58,10 @@ export default function BookingsDashboard() {
       </div>
 
       {/* Add New Booking Button */}
-      <Button className="w-full sm:w-auto">
+      <Button asChild className="w-full sm:w-auto">
+        <Link href='/dashboard/bookings/create' >
         <Plus className="mr-2 h-4 w-4" /> Add New Booking
+        </Link>
       </Button>
 
       {/* Bookings List View */}
