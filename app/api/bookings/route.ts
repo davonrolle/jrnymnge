@@ -1,10 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, Booking } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
-export async function GET(): Promise<NextResponse> {
+// Handle GET requests - Fetch bookings for the current user
+export async function GET() {
+  try {
+    const user = await currentUser(); // Get the current user from Clerk
+
+    if (!user || !user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Query bookings where the userId matches the user's Clerk ID
+    const bookings = await prisma.booking.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(bookings, { status: 200 });
+  } catch {
+    console.error("Error fetching bookings");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// Handle POST requests - Create a new booking
+export async function POST(req: NextRequest) {
   try {
     const user = await currentUser();
 
@@ -12,26 +35,30 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const bookings: Booking[] = await prisma.booking.findMany({
-      where: {
-        userId: user.id,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // Read and parse the request body
+    const body = await req.text();
+    if (!body) {
+      return NextResponse.json({ error: "Request body cannot be empty" }, { status: 400 });
+    }
 
-    return NextResponse.json(bookings, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
-
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  try {
-    const user = await currentUser();
-
-    if (!user || !user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let parsedBody: {
+      vehicleId: string;
+      vehicleBooked: string;
+      startDate: string;
+      endDate: string;
+      totalAmount: number;
+      pickupLocation?: string;
+      dropoffLocation?: string;
+      specialRequests?: string;
+      insurance?: string;
+      mileagePolicy?: string;
+      fuelPolicy?: string;
+      tempName?: string;
+    };
+    try {
+      parsedBody = JSON.parse(body);
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 });
     }
 
     const {
@@ -47,42 +74,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       mileagePolicy,
       fuelPolicy,
       tempName,
-    }: {
-      vehicleId: string;
-      vehicleBooked: string;
-      startDate: string;
-      endDate: string;
-      totalAmount: number;
-      pickupLocation?: string;
-      dropoffLocation?: string;
-      specialRequests?: string;
-      insurance?: string;
-      mileagePolicy?: string;
-      fuelPolicy?: string;
-      tempName?: string;
-    } = await req.json();
+    } = parsedBody;
 
+    // Validate required fields
     if (!vehicleId || !startDate || !endDate || !totalAmount) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    let customerId: string | undefined = undefined;
-
-    const customer = await prisma.customer.findFirst({
-      where: { userId: user.id },
-    });
-
-    if (customer) {
-      customerId = customer.id;
-    }
-
-    const booking: Booking = await prisma.booking.create({
+    // Create the booking
+    const booking = await prisma.booking.create({
       data: {
         vehicleBooked,
         tempName,
-        customerId,
+        userId: user.id, // Use user.id to associate the booking with the user
         vehicleId,
-        userId: user.id,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         totalAmount,
@@ -96,41 +101,57 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     return NextResponse.json(booking, { status: 201 });
-  } catch (error) {
-    console.error(error);
+  } catch (err: unknown) {
+    const error = err as { code?: string; message?: string };
+    console.error("Error creating booking:", error?.message || err);
+
+    if (error?.code === "P2002") {
+      return NextResponse.json({ error: "A booking with similar details already exists" }, { status: 400 });
+    }
+
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest): Promise<NextResponse> {
+// Handle DELETE requests - Delete a booking by ID
+export async function DELETE(req: NextRequest) {
   try {
+    // Check if the user is authenticated
     const user = await currentUser();
 
     if (!user || !user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const bookingId = req.nextUrl.searchParams.get("id");
+    // Get the booking ID from the query parameter
+    const id = req.nextUrl.searchParams.get("id");
 
-    if (!bookingId || typeof bookingId !== "string") {
-      return NextResponse.json({ error: "Invalid booking ID" }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
     }
 
+    // Check if the booking exists
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
+      where: { id },
     });
 
-    if (!booking || booking.userId !== user.id) {
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    // Check if the booking belongs to the user
+    if (booking.userId !== user.id) {
       return NextResponse.json({ error: "Booking not found or unauthorized" }, { status: 404 });
     }
 
+    // Delete the booking
     await prisma.booking.delete({
-      where: { id: bookingId },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Booking deleted successfully" }, { status: 200 });
-  } catch (error) {
-    console.error(error);
+  } catch {
+    console.error("Error deleting booking.");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
