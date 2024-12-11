@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  clerkId   String     @unique
+  bookings  Booking[]
+  reviews   Review[]   @relation("UserReviews")
+  vehicles  Vehicle[]
+  customers Customer[]
+}
+
+model Review {
+  id           String    @id @default(uuid())
+  rating       Int
+  review       String?
+  reviewerId   String?
+  reviewerType String
+  vehicleId    String
+  createdAt    DateTime  @default(now())
+  vehicle      Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user         User?     @relation("UserReviews", fields: [reviewerId], references: [id], map: "Review_UserReviewerId_fkey")
+  customer     Customer? @relation("CustomerReviews", fields: [reviewerId], references: [id], map: "Review_CustomerReviewerId_fkey")
+}
+
+model Vehicle {
+  id           String    @id @default(uuid())
+  make         String
+  model        String
+  year         Int
+  dailyRate    Float
+  licensePlate String?
+  status       String    @default("Available")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  ownerId      String
+  owner        User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+  reviews      Review[]
+}
+
+model Booking {
+  id               String    @id @default(cuid())
+  tempName    String?
+  vehicleBooked    String
+  vehicleId        String
+  userId           String
+  customerId       String?   // Allow customerId to be nullable
+  startDate        DateTime
+  endDate          DateTime
+  totalAmount      Float
+  pickupLocation   String
+  dropoffLocation  String
+  specialRequests  String?
+  insurance        String?
+  mileagePolicy    String?
+  fuelPolicy       String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  vehicle          Vehicle   @relation(fields: [vehicleId], references: [id])
+  user             User      @relation(fields: [userId], references: [id])
+  customer         Customer? @relation(fields: [customerId], references: [id])
+}
+
+model Customer {
+  id            String    @id @default(cuid())
+  firstName          String?
+  lastName      String?
+  email         String    @unique
+  phone         String?
+  totalBookings Int       @default(0)
+  status        String    @default("Active")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  reviews       Review[]  @relation("CustomerReviews")
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id])
+  Booking       Booking[]
+}
+
+model Waitlist {
+  id        String     @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String   @unique
+  phone         String   @unique
+}
+
+model Donation {
+  id            String   @id @default(cuid()) // Unique identifier
+  name          String   // Donor's name
+  email         String   // Donor's email address
+  amount        Float    // Donation amount in USD
+  transactionId String   // PayPal transaction ID
+  createdAt     DateTime @default(now()) // Timestamp of the donation
+}

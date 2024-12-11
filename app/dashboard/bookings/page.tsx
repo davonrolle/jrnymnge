@@ -1,145 +1,244 @@
-import { Calendar, Filter, Plus } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import Link from 'next/link'
+"use client";
 
-// Dummy data for bookings
-const bookings = [
-  { id: 'BK001', customerName: 'John Doe', vehicle: 'Toyota Camry (ABC123)', startDate: '2023-06-01', endDate: '2023-06-05', status: 'Confirmed', totalCost: '$250' },
-  { id: 'BK002', customerName: 'Jane Smith', vehicle: 'Honda Civic (XYZ789)', startDate: '2023-06-03', endDate: '2023-06-07', status: 'Pending', totalCost: '$200' },
-  { id: 'BK003', customerName: 'Bob Johnson', vehicle: 'Ford Mustang (DEF456)', startDate: '2023-06-05', endDate: '2023-06-10', status: 'In Progress', totalCost: '$400' },
-  { id: 'BK004', customerName: 'Alice Brown', vehicle: 'Chevrolet Malibu (GHI789)', startDate: '2023-06-07', endDate: '2023-06-12', status: 'Confirmed', totalCost: '$300' },
-  { id: 'BK005', customerName: 'Charlie Wilson', vehicle: 'Nissan Altima (JKL012)', startDate: '2023-06-10', endDate: '2023-06-15', status: 'Pending', totalCost: '$275' },
-]
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { format } from "date-fns";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
-export default function BookingsDashboard() {
+type Booking = {
+  id: string;
+  customerId: string;
+  vehicleId: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  totalAmount: number;
+  pickupLocation: string;
+  dropoffLocation: string;
+  paymentStatus: string;
+  createdAt: string;
+  updatedAt: string;
+  specialRequests?: string;
+  insurance?: string;
+  mileagePolicy?: string;
+  fuelPolicy?: string;
+  customer?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  vehicle?: {
+    make: string;
+    model: string;
+    year: number;
+  };
+  tempFirstName?: string;
+};
+
+export default function BookingsPage() {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sortField, setSortField] = useState<keyof Booking>("startDate");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { isSignedIn, isLoaded, userId } = useAuth();
+
+  const fetchBookingsForUser = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      if (!userId) {
+        throw new Error("User not signed in");
+      }
+      const response = await fetch(`/api/bookings?userId=${userId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch bookings");
+      }
+      const data: Booking[] = await response.json();
+      setBookings(data);
+    } catch {
+      // Handle error if necessary
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (isSignedIn && userId) {
+      fetchBookingsForUser();
+    }
+  }, [isSignedIn, userId, fetchBookingsForUser]);
+
+  const handleSort = (field: keyof Booking) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const filteredBookings = bookings.filter((booking) =>
+    `${booking.customer?.firstName || ""}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${booking.vehicle?.make || ""}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${booking.vehicle?.model || ""}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${booking.status || ""}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedBookings = filteredBookings.sort((a, b) => {
+    const aValue = a[sortField] ?? "";
+    const bValue = b[sortField] ?? "";
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentBookings = sortedBookings.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isSignedIn) {
+    return <div>Please sign in to access this page.</div>;
+  }
+
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold mb-4">Bookings Management Dashboard</h1>
-      
-      {/* Notifications and Alerts */}
-      <Alert>
-        <AlertTitle>Attention</AlertTitle>
-        <AlertDescription>You have 2 pending bookings that need confirmation.</AlertDescription>
-      </Alert>
-
-      {/* Search and Filter Panel */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Input className="flex-grow" type="text" placeholder="Search bookings..." />
-          <Select>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by status" />
+    <Card>
+      <CardHeader>
+        <CardTitle>Bookings</CardTitle>
+        <CardDescription>Manage your vehicle bookings</CardDescription>
+        <div className="mt-4">
+          <Link href="/dashboard/bookings/create">
+            <Button variant="default">Create New Booking</Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex justify-between items-center mb-4">
+          <Input
+            placeholder="Search bookings..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select onValueChange={(value) => setItemsPerPage(Number(value))}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Items per page" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="in-progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="canceled">Canceled</SelectItem>
+              <SelectItem value="10">10 per page</SelectItem>
+              <SelectItem value="20">20 per page</SelectItem>
+              <SelectItem value="50">50 per page</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Filter className="mr-2 h-4 w-4" /> More Filters
-          </Button>
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Calendar className="mr-2 h-4 w-4" /> Calendar View
-          </Button>
-        </div>
-      </div>
-
-      {/* Add New Booking Button */}
-      <Button asChild className="w-full sm:w-auto">
-        <Link href='/dashboard/bookings/create' >
-        <Plus className="mr-2 h-4 w-4" /> Add New Booking
-        </Link>
-      </Button>
-
-      {/* Bookings List View */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Bookings</CardTitle>
-          <CardDescription>Manage your vehicle bookings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : bookings.length === 0 ? (
+          <div className="text-center">No bookings found</div>
+        ) : (
+          <>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Booking ID</TableHead>
-                  <TableHead>Customer Name</TableHead>
+                  <TableHead onClick={() => handleSort("startDate")} className="cursor-pointer">
+                    Start Date {sortField === "startDate" && (sortDirection === "asc" ? <ChevronUp className="inline" /> : <ChevronDown className="inline" />)}
+                  </TableHead>
+                  <TableHead>Customer</TableHead>
                   <TableHead>Vehicle</TableHead>
-                  <TableHead>Booking Dates</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Total Cost</TableHead>
+                  <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
+                    Status {sortField === "status" && (sortDirection === "asc" ? <ChevronUp className="inline" /> : <ChevronDown className="inline" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("totalAmount")} className="cursor-pointer">
+                    Total Amount {sortField === "totalAmount" && (sortDirection === "asc" ? <ChevronUp className="inline" /> : <ChevronDown className="inline" />)}
+                  </TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map((booking) => (
+                {currentBookings.map((booking) => (
                   <TableRow key={booking.id}>
-                    <TableCell className="font-medium">{booking.id}</TableCell>
-                    <TableCell>{booking.customerName}</TableCell>
-                    <TableCell>{booking.vehicle}</TableCell>
-                    <TableCell>{`${booking.startDate} - ${booking.endDate}`}</TableCell>
                     <TableCell>
-                      <Badge variant={booking.status === 'Confirmed' ? 'default' : 'secondary'}>
+                      {booking.startDate ? format(new Date(booking.startDate), "MMM dd, yyyy") : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {booking.customer 
+                        ? `${booking.customer.firstName} ${booking.customer.lastName}`
+                        : `${booking.tempFirstName || "Guest"}`}
+                    </TableCell>
+                    <TableCell>
+                      {booking.vehicle 
+                        ? `${booking.vehicle.year} ${booking.vehicle.make} ${booking.vehicle.model}` 
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          booking.status === "Confirmed"
+                            ? "default"
+                            : booking.status === "Pending"
+                            ? "secondary"
+                            : "destructive"
+                        }
+                      >
                         {booking.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{booking.totalCost}</TableCell>
+                    <TableCell>${booking.totalAmount.toFixed(2)}</TableCell>
                     <TableCell>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">View Details</Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-3xl">
-                          <DialogHeader>
-                            <DialogTitle>Booking Details - {booking.id}</DialogTitle>
-                          </DialogHeader>
-                          <div className="grid gap-4">
-                            <div>
-                              <h3 className="font-semibold">Customer Information</h3>
-                              <p>{booking.customerName}</p>
-                            </div>
-                            <div>
-                              <h3 className="font-semibold">Booking Details</h3>
-                              <p>Vehicle: {booking.vehicle}</p>
-                              <p>Dates: {booking.startDate} - {booking.endDate}</p>
-                            </div>
-                            <div>
-                              <h3 className="font-semibold">Payment Information</h3>
-                              <p>Total Cost: {booking.totalCost}</p>
-                              <p>Status: {booking.status}</p>
-                            </div>
-                            <div>
-                              <h3 className="font-semibold">Actions</h3>
-                              <div className="flex flex-wrap gap-2">
-                                <Button size="sm">Update Status</Button>
-                                <Button size="sm" variant="outline">Edit Booking</Button>
-                                <Button size="sm" variant="destructive">Cancel Booking</Button>
-                              </div>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Link href={`/dashboard/bookings/${booking.id}`}>
+                        <Button variant="link">View</Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+            <div className="flex justify-between mt-4">
+              <Button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </Button>
+              <Button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === Math.ceil(sortedBookings.length / itemsPerPage)}
+              >
+                Next
+              </Button>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

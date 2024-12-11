@@ -1,4 +1,5 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,9 +9,55 @@ import {
   Car,
   CreditCard,
   MessageCircle,
+  Coffee,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Separator } from "@/components/ui/separator";
 
 export default function Homepage() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setMessage("You have successfully joined the waitlist!");
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+        });
+      } else {
+        const error = await response.json();
+        setMessage(error.error || "An error occurred. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setMessage("An unexpected error occurred. Please try again.");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       <main className="flex-1">
@@ -18,20 +65,16 @@ export default function Homepage() {
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
               <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-2 flex flex-col items-center">
                   <h1 className="text-3xl text-center font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Streamline Your Car Rental Business
                   </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  <p className="text-center max-w-[600px] text-muted-foreground md:text-xl">
                     All-in-one management tool for car rental businesses—track
                     bookings, manage payments, and streamline operations.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-                  <Button className="font-bold" size="lg">
-                    <Link href="/sign-up">Try It Free</Link>
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
                   <Button
                     asChild
                     className="font-bold dark:bg-stone-800 dark:hover:bg-stone-700"
@@ -41,18 +84,94 @@ export default function Homepage() {
                     <Link href="/features">Learn More</Link>
                   </Button>
                 </div>
+                <br />
+                <Separator />
+
               </div>
-              <div className="flex items-center justify-center lg:order-last">
-                <Image
-                  alt="Hero"
-                  className="aspect-video overflow-hidden rounded-xl object-cover object-center w-full h-auto"
-                  height="550"
-                  src="/placeholder.svg"
-                  width="550"
-                />
+             <div className="flex justify-center">
+                <form
+                  id="waitlist-form"
+                  onSubmit={handleSubmit}
+                  className="space-y-4 w-full max-w-md"
+                >
+                  <h2 className="text-xl font-semibold text-center">
+                    Join Our Waitlist
+                  </h2>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Be the first to experience our game-changing car rental
+                    management platform! Join our waitlist for early access,
+                    exclusive updates, and special rewards.
+                  </p>
+                  {message && (
+                    <p className="text-center text-sm font-bold animate-bounce text-green-500">
+                      {message}
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      placeholder="Enter your first name"
+                      required
+                      value={formData.firstName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      placeholder="Enter your last name"
+                      required
+                      value={formData.lastName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email address"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full font-bold">
+                    Join Waitlist!
+                  </Button>
+                </form>
+                </div>
+                <Separator/>
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Love what we&apos;re building? Consider supporting us with a
+                    coffee to keep the momentum going!
+                  </p>
+                  <br />
+                  <Button className="font-bold" asChild size="sm">
+                    <Link href="/donate">Buy Us a Coffee<Coffee /></Link>
+                    
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
         </section>
 
         <section
@@ -148,7 +267,7 @@ export default function Homepage() {
 
         <section
           id="testimonials"
-          className="w-full py-12 md:py-24 lg:py-32 bg-muted flex justify-center"
+          className="w-full py-12 md:py-24 lg:py-32 bg-muted justify-center hidden"
         >
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
@@ -188,7 +307,7 @@ export default function Homepage() {
 
         <section
           id="pricing"
-          className="w-full py-12 md:py-24 lg:py-32 flex justify-center"
+          className="w-full py-12 md:py-24 lg:py-32 justify-center hidden"
         >
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">

@@ -80,6 +80,8 @@ export default function PricingPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Content remains the same */}
+<h1 className="text-center text-xl font-bold">Pricing May Change!</h1>
+<br />
       <Tabs defaultValue="monthly" className="mb-12">
         <TabsList className="grid w-[400px] grid-cols-2 mx-auto">
           <TabsTrigger value="monthly">Monthly Billing</TabsTrigger>
@@ -151,11 +153,8 @@ function PricingCard({ plan, billing }: PricingCardProps) {
         </ul>
       </CardContent>
       <CardFooter>
-        <Button
-          className="w-full"
-          variant={plan.name === "Professional" ? "default" : "outline"}
-        >
-          Start Free Trial
+        <Button className="w-full font-bold animate-pulse" variant="default">
+          Start 2 Week Trial FREE (Coming Soon)
         </Button>
       </CardFooter>
     </Card>

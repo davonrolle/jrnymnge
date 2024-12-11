@@ -3,8 +3,8 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Bell } from "lucide-react";
-import { SignedIn, SignInButton, SignOutButton } from "@clerk/nextjs";
+import { Menu, X, Bell, Coffee } from "lucide-react";
+import { SignedIn, SignOutButton } from "@clerk/nextjs";
 import { SignedOut } from "@clerk/clerk-react";
 import { usePathname } from "next/navigation";
 import {
@@ -33,7 +33,7 @@ export function NavBar() {
   const signedInNavItems = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/bookings", label: "Bookings" },
-    { href: "/dashboard/fleet", label: "Fleet" },
+    { href: "/dashboard/vehicles", label: "Fleet" },
     { href: "/dashboard/customers", label: "Customers" },
     { href: "/dashboard/reports", label: "Reports" },
     { href: "/dashboard/settings", label: "Settings" },
@@ -56,7 +56,7 @@ export function NavBar() {
 
   return (
     <header className="sticky w-full top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className=" flex justify-between items-center h-14 px-6 lg:px-72">
+      <div className="flex justify-between items-center h-14 px-6">
         {/* JRNY logo on the left */}
         <Link href="/" className="font-bold text-xl text-primary animate-pulse">
           JRNY
@@ -64,6 +64,7 @@ export function NavBar() {
 
         {/* Navigation links on the right */}
         <nav className="hidden md:flex items-center space-x-1">
+          <Button asChild className="font-bold animate-pulse"><Link href="/donate">Donate a Coffee<Coffee className="animate-bounce"/></Link></Button>
           <SignedOut>
             {signedOutNavItems.map((item) => (
               <Link
@@ -74,9 +75,9 @@ export function NavBar() {
                 {item.label}
               </Link>
             ))}
-            <SignInButton forceRedirectUrl="/dashboard" mode="modal">
+            {/*<SignInButton forceRedirectUrl="/dashboard" mode="modal">
               <Button size="sm">Sign in</Button>
-            </SignInButton>
+            </SignInButton>*/}
           </SignedOut>
           <SignedIn>
           <Dialog
@@ -132,7 +133,7 @@ export function NavBar() {
 
         {/* Notifications and mobile menu toggle on small screens */}
         <div className="flex items-center space-x-2 md:hidden">
-          
+        <Button asChild className="font-bold animate-pulse"><Link href="/donate">Donate a Coffee<Coffee className="animate-bounce"/></Link></Button>
           <Button
             variant="ghost"
             size="icon"
@@ -167,9 +168,9 @@ export function NavBar() {
                 {item.label}
               </Link>
             ))}
-            <SignInButton forceRedirectUrl="/dashboard" mode="modal">
+            {/*<SignInButton forceRedirectUrl="/dashboard" mode="modal">
               <Button className="w-full">Sign in</Button>
-            </SignInButton>
+            </SignInButton>*/}
           </SignedOut>
           <SignedIn>
             {signedInNavItems.map((item) => (

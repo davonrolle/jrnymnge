@@ -1,41 +1,110 @@
 'use client';
 
-import { Edit, Eye, Filter, MoreHorizontal,Trash, UserPlus } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { Edit, Eye, MoreHorizontal, Trash, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import Link from 'next/link';
+import Link from "next/link";
 
-// Dummy data for customers
-const customers = [
-  { id: 'C001', name: 'John Doe', email: 'john@example.com', phone: '(123) 456-7890', totalBookings: 5, status: 'Active' },
-  { id: 'C002', name: 'Jane Smith', email: 'jane@example.com', phone: '(234) 567-8901', totalBookings: 3, status: 'VIP' },
-  { id: 'C003', name: 'Bob Johnson', email: 'bob@example.com', phone: '(345) 678-9012', totalBookings: 1, status: 'Inactive' },
-  { id: 'C004', name: 'Alice Brown', email: 'alice@example.com', phone: '(456) 789-0123', totalBookings: 7, status: 'Active' },
-  { id: 'C005', name: 'Charlie Wilson', email: 'charlie@example.com', phone: '(567) 890-1234', totalBookings: 2, status: 'Active' },
-];
-
-
-// Default selected customer
-const selectedCustomer = customers[0];
+type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  totalBookings: number;
+  status: string;
+};
 
 export default function CustomerManagement() {
+  const { userId, getToken } = useAuth();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("all");
+
+  const fetchCustomers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/customers?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch customers");
+      }
+
+      const data = await response.json();
+      setCustomers(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err);
+        setError(err.message || "An error occurred while fetching customers.");
+      } else {
+        setError("An unknown error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken, userId]);
+
+  const deleteCustomer = async (customerId: string) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/customers?id=${customerId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete customer");
+      }
+
+      setCustomers((prev) => prev.filter((customer) => customer.id !== customerId));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err);
+        alert(err.message || "An error occurred while deleting the customer.");
+      } else {
+        alert("An unknown error occurred.");
+      }
+    }
+  };
+
+  const filterCustomers = (customers: Customer[]) => {
+    if (filter === "all") return customers;
+    return customers.filter((customer) => customer.status.toLowerCase() === filter.toLowerCase());
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchCustomers();
+    }
+  }, [userId, fetchCustomers]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">Error: {error}</div>;
+
+  const filteredCustomers = filterCustomers(customers);
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold mb-4">Customer Management</h1>
 
-      {/* Customer Search and Filter Panel */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <Input className="flex-grow" type="text" placeholder="Search customers..." />
-          <Select>
+          <Select onValueChange={setFilter}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -47,21 +116,14 @@ export default function CustomerManagement() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Filter className="mr-2 h-4 w-4" /> More Filters
-          </Button>
-        </div>
       </div>
 
-      {/* Add New Customer Button */}
       <Button asChild className="w-full sm:w-auto">
         <Link href="/dashboard/customers/create">
-        <UserPlus className="mr-2 h-4 w-4" /> Add New Customer
+          <UserPlus className="mr-2 h-4 w-4" /> Add New Customer
         </Link>
       </Button>
 
-      {/* Customer Overview Section */}
       <Card>
         <CardHeader>
           <CardTitle>Customer Overview</CardTitle>
@@ -81,17 +143,25 @@ export default function CustomerManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
+                {filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
                     <TableCell className="font-medium">{customer.id}</TableCell>
                     <TableCell>{customer.name}</TableCell>
                     <TableCell>
                       <div>{customer.email}</div>
-                      <div>{customer.phone}</div>
+                      {customer.phone && <div>{customer.phone}</div>}
                     </TableCell>
                     <TableCell>{customer.totalBookings}</TableCell>
                     <TableCell>
-                      <Badge variant={customer.status === 'Active' ? 'default' : customer.status === 'VIP' ? 'secondary' : 'outline'}>
+                      <Badge
+                        variant={
+                          customer.status.toLowerCase() === "active"
+                            ? "default"
+                            : customer.status.toLowerCase() === "vip"
+                            ? "secondary"
+                            : "outline"
+                        }
+                      >
                         {customer.status}
                       </Badge>
                     </TableCell>
@@ -114,7 +184,7 @@ export default function CustomerManagement() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => deleteCustomer(customer.id)}>
                             <Trash className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
@@ -128,51 +198,6 @@ export default function CustomerManagement() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Customer Details Section */}
-      <Dialog open={false}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Customer Details - {selectedCustomer.id}</DialogTitle>
-          </DialogHeader>
-          <Tabs defaultValue="info" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="info">Info</TabsTrigger>
-              <TabsTrigger value="bookings">Bookings</TabsTrigger>
-              <TabsTrigger value="payments">Payments</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-            </TabsList>
-            <TabsContent value="info">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Name</Label>
-                      <div>{selectedCustomer.name}</div>
-                    </div>
-                    <div>
-                      <Label>Email</Label>
-                      <div>{selectedCustomer.email}</div>
-                    </div>
-                    <div>
-                      <Label>Phone</Label>
-                      <div>{selectedCustomer.phone}</div>
-                    </div>
-                    <div>
-                      <Label>Status</Label>
-                      <div>{selectedCustomer.status}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            {/* Other Tabs Content */}
-          </Tabs>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

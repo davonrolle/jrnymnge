@@ -18,6 +18,7 @@ import {
   Cog,
   ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function FeaturesPage() {
   const features = [
@@ -223,7 +224,7 @@ export default function FeaturesPage() {
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-6">
                 {feature.subFeatures.map((subFeature, index) => (
-                  <Card key={index}>
+                  <Card className="bg-stone-900" key={index}>
                     <CardHeader>
                       <CardTitle className="text-xl text-center">
                         {subFeature.title}
@@ -279,7 +280,7 @@ export default function FeaturesPage() {
         </h2>
         <div className="aspect-video bg bg-muted rounded-lg flex items-center justify-center">
           <p className="text-muted-foreground">
-            Interactive demo or video tour would be displayed here
+            Interactive demo or video tour coming soon!
           </p>
         </div>
       </div>
@@ -288,9 +289,11 @@ export default function FeaturesPage() {
         <h2 className="text-2xl font-bold mb-4">
           Ready to Revolutionize Your Car Rental Business?
         </h2>
-        <Button size="lg">
-          Start Your Free Trial
+        <Button size="lg" className="font-bold" asChild>
+          <Link href="/">
+          Join the Waitlist!
           <ChevronRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </div>
     </div>

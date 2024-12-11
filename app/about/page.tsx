@@ -136,7 +136,7 @@ export default function AboutPage() {
             </h3>
             <p className="mb-4">
               Hi, I&apos;m Davon Rolle, the founder of JRNY Management. With
-              over a decade of experience in the car rental industry, I&apos;ve
+              some experience in the car rental industry, I&apos;ve
               witnessed firsthand the challenges that rental businesses face
               daily. This inspired me to create a solution that simplifies
               operations and helps businesses thrive in this competitive market.
@@ -153,47 +153,39 @@ export default function AboutPage() {
       </Card>
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-center">Our Impact</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="italic mb-4">
-              &quot;JRNY Management has transformed the way I manage my rentals!
-                The system is intuitive, and the customer support team is always
-                there to help.&quot;
-              </p>
-              <p className="font-semibold">
-                - Sarah Johnson, Owner of City Rides
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="italic mb-4">
-              &quot;Since implementing JRNY Management, we&apos;ve seen a 30%
-                increase in bookings and a significant reduction in
-                administrative work. It&apos;s a game-changer!&quot;
-              </p>
-              <p className="font-semibold">
-                - Mike Thompson, Fleet Manager at Sunset Rentals
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+  <h2 className="text-2xl font-semibold text-center">Our Vision for Impact</h2>
+  <div className="grid md:grid-cols-2 gap-4">
+    <Card>
+      <CardContent className="pt-6">
+        <p className="mb-4">
+          JRNY Management is designed to revolutionize the car rental industry by providing an intuitive, user-friendly platform that simplifies daily operations for business owners. From managing bookings to tracking fleet performance, we&apos;re here to make your life easier.
+        </p>
+        <p className="font-semibold">- Empowering Business Growth</p>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="pt-6">
+        <p className="mb-4">
+          Our platform is built to drive tangible results: helping businesses increase bookings, reduce administrative workload, and deliver seamless customer experiences. We are committed to helping you achieve greater efficiency and profitability.
+        </p>
+        <p className="font-semibold">- Driving Results That Matter</p>
+      </CardContent>
+    </Card>
+  </div>
+</section>
 
       <Card className="text-center">
         <CardHeader>
           <CardTitle>Ready to Transform Your Rental Business?</CardTitle>
           <CardDescription>
-            Join thousands of satisfied users and start managing your fleet with
+            Join what will be thousands of satisfied users and start managing your fleet with
             ease.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild size="lg" className="font-bold">
-            <Link href="/signup">
-              Start Your Free Trial
+            <Link href="/">
+              Join Our Waitlist
               <ChevronRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

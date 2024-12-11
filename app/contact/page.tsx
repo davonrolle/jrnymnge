@@ -225,11 +225,11 @@ export default function ContactPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>support@carrentalapp.com</span>
+                <span>jrny242@gmail.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>+1 (555) 123-4567</span>
+                <span>+1 (242) 455-XXXX</span>
               </div>
               <div>
                 <Link href="/faq" className="text-primary hover:underline">
