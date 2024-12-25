@@ -25,7 +25,7 @@ import {
 export default function DashboardOverview() {
   const activeRentals = 42;
   const upcomingReservations = 15;
-  const dailyRevenue  = 3250;
+  const dailyRevenue  = 3;
   const weeklyRevenue = 22800;
   const monthlyRevenue  = 97500;
   const rentedVehicles = 42;
@@ -81,13 +81,13 @@ export default function DashboardOverview() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Daily Revenue
+                  Maintainence Reminders
                 </CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  ${dailyRevenue.toLocaleString()}
+                  {dailyRevenue.toLocaleString()}
                 </div>
               </CardContent>
             </Card>

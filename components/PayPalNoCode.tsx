@@ -49,15 +49,21 @@ const PayPalButton = () => {
     };
 
     const renderPayPalButton = () => {
-      try {
-        window.paypal
-          ?.HostedButtons({
+      // Add a small delay to ensure PayPal SDK is fully initialized
+      setTimeout(() => {
+        try {
+          if (!window.paypal?.HostedButtons) {
+            console.error("PayPal HostedButtons not available");
+            return;
+          }
+          
+          window.paypal.HostedButtons({
             hostedButtonId: "9RMHPWNU5VKVN",
-          })
-          .render("#paypal-container-9RMHPWNU5VKVN");
-      } catch (error) {
-        console.error("Error rendering PayPal button:", error);
-      }
+          }).render("#paypal-container-9RMHPWNU5VKVN");
+        } catch (error) {
+          console.error("Error rendering PayPal button:", error);
+        }
+      }, 1000); // 1 second delay
     };
 
     loadPayPalScript();
@@ -65,7 +71,7 @@ const PayPalButton = () => {
 
   return (
     <div>
-      <Card className="p-6 bg-stone-800 shadow-stone-500 shadow-lg">
+      <Card className="p-6 bg-stone-800 shadow-stone-500">
         <div id="paypal-container-9RMHPWNU5VKVN"></div>
       </Card>
     </div>

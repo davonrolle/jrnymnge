@@ -1,5 +1,4 @@
-"use client";
-
+ 
 import PayPalButton from "@/components/PayPalNoCode";
 
 export default function DonatePage() {
