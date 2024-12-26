@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendWaitlistNotification } from "@/lib/email";
 
 // Utility function for parsing JSON
 const parseBody = async (req: NextRequest) => {
@@ -44,8 +45,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Send email notification
+    try {
+      await sendWaitlistNotification({ firstName, lastName, email, phone });
+    } catch (emailError) {
+      console.error("Failed to send email notification:", emailError);
+      // Don't return error here - we still want to return success even if email fails
+    }
+
     return NextResponse.json(waitlistEntry, { status: 201 });
-  } catch {
+  } catch (error) {
     return NextResponse.json(
       { error: "Failed to create waitlist entry" },
       { status: 500 }
@@ -125,7 +134,10 @@ export async function DELETE(req: NextRequest) {
       where: { id },
     });
 
-    return NextResponse.json({ message: "Waitlist entry deleted" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Waitlist entry deleted" },
+      { status: 200 }
+    );
   } catch {
     return NextResponse.json(
       { error: "Failed to delete waitlist entry" },
