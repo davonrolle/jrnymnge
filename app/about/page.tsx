@@ -124,7 +124,7 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row items-center gap-6">
           <Image
-            src="/placeholder.svg"
+            src="/faceshot.jpg"
             alt="Davon Rolle"
             width={200}
             height={200}

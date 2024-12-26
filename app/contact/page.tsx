@@ -173,7 +173,7 @@ export default function ContactPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Image
-                  src="/placeholder.svg"
+                  src="/faceshot.jpg"
                   alt="Developer"
                   width={100}
                   height={100}
