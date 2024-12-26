@@ -23,11 +23,8 @@ import {
 } from "@/components/ui/select";
 import {
   AlertCircle,
-  Github,
-  Linkedin,
   Mail,
   Phone,
-  Twitter,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 

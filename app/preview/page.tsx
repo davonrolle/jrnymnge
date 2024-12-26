@@ -364,9 +364,9 @@ export default function DashboardOverview() {
           <DialogHeader>
             <DialogTitle>Coming Soon!</DialogTitle>
             <DialogDescription className="pt-4 text-center">
-              This feature isn't ready yet but will be available when the
+              This feature isn&apos;t ready yet but will be available when the
               product launches. Join our waitlist to be the first to know when
-              it's ready!
+              it&apos;s ready!
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center mt-4">
