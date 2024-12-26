@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,6 +12,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Link from "next/link";
+import { useState } from "react";
 
 type Plan = {
   name: string;
@@ -80,8 +91,8 @@ export default function PricingPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Content remains the same */}
-<h1 className="text-center text-xl font-bold">Pricing May Change!</h1>
-<br />
+      <h1 className="text-center text-xl font-bold">Pricing May Change!</h1>
+      <br />
       <Tabs defaultValue="monthly" className="mb-12">
         <TabsList className="grid w-[400px] grid-cols-2 mx-auto">
           <TabsTrigger value="monthly">Monthly Billing</TabsTrigger>
@@ -113,6 +124,7 @@ type PricingCardProps = {
 };
 
 function PricingCard({ plan, billing }: PricingCardProps) {
+  const [showModal, setShowModal] = useState(false);
   const price = billing === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
   const discount = (
     ((plan.monthlyPrice * 12 - plan.yearlyPrice) / (plan.monthlyPrice * 12)) *
@@ -120,43 +132,69 @@ function PricingCard({ plan, billing }: PricingCardProps) {
   ).toFixed(0);
 
   return (
-    <Card className={plan.name === "Professional" ? "border-primary" : ""}>
-      <CardHeader>
-        <CardTitle>{plan.name}</CardTitle>
-        <CardDescription>{plan.description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold mb-2">
-          ${price}
-          <span className="text-lg font-normal text-muted-foreground">
-            /{billing === "monthly" ? "mo" : "yr"}
-          </span>
-        </div>
-        {billing === "yearly" && (
-          <Badge variant="secondary" className="mb-4">
-            Save {discount}%
-          </Badge>
-        )}
-        <ul className="space-y-2 mb-4">
-          {plan.features.map((feature: string, index: number) => (
-            <li key={index} className="flex items-center">
-              <Check className="h-5 w-5 text-green-500 mr-2" />
-              {feature}
-            </li>
-          ))}
-          {plan.notIncluded.map((feature: string, index: number) => (
-            <li key={index} className="flex items-center text-muted-foreground">
-              <X className="h-5 w-5 text-red-500 mr-2" />
-              {feature}
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full font-bold animate-pulse" variant="default">
-          Start 2 Week Trial FREE (Coming Soon)
-        </Button>
-      </CardFooter>
-    </Card>
+    <>
+      <Card className={plan.name === "Professional" ? "border-primary" : ""}>
+        <CardHeader>
+          <CardTitle>{plan.name}</CardTitle>
+          <CardDescription>{plan.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold mb-2">
+            ${price}
+            <span className="text-lg font-normal text-muted-foreground">
+              /{billing === "monthly" ? "mo" : "yr"}
+            </span>
+          </div>
+          {billing === "yearly" && (
+            <Badge variant="secondary" className="mb-4">
+              Save {discount}%
+            </Badge>
+          )}
+          <ul className="space-y-2 mb-4">
+            {plan.features.map((feature: string, index: number) => (
+              <li key={index} className="flex items-center">
+                <Check className="h-5 w-5 text-green-500 mr-2" />
+                {feature}
+              </li>
+            ))}
+            {plan.notIncluded.map((feature: string, index: number) => (
+              <li
+                key={index}
+                className="flex items-center text-muted-foreground"
+              >
+                <X className="h-5 w-5 text-red-500 mr-2" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+        <CardFooter>
+          <Button
+            className="w-full font-bold animate-pulse"
+            variant="default"
+            onClick={() => setShowModal(true)}
+          >
+            Start 2 Week Trial
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Coming Soon!</DialogTitle>
+            <DialogDescription className="pt-4">
+              This feature is not available until the product launches. Join our
+              waitlist to be notified when we go live!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center">
+            <Link href="/">
+              <Button className="font-bold">Join Waitlist</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

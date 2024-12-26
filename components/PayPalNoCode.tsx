@@ -17,12 +17,20 @@ const PayPalButton = () => {
   useEffect(() => {
     const loadPayPalScript = async () => {
       // Check if PayPal script is already loaded
-      if (document.querySelector('script[src*="www.paypal.com/sdk/js"]')) {
-        if (window.paypal) {
-          renderPayPalButton();
-        } else {
-          console.error("PayPal SDK not available on window.");
-        }
+      const existingScript = document.querySelector(
+        'script[src*="www.paypal.com/sdk/js"]'
+      );
+
+      if (existingScript) {
+        // Wait for PayPal to be available
+        const waitForPayPal = () => {
+          if (window.paypal) {
+            renderPayPalButton();
+          } else {
+            setTimeout(waitForPayPal, 100);
+          }
+        };
+        waitForPayPal();
         return;
       }
 
@@ -33,37 +41,45 @@ const PayPalButton = () => {
       script.async = true;
       script.crossOrigin = "anonymous";
 
-      script.onload = () => {
-        if (window.paypal) {
-          renderPayPalButton();
-        } else {
-          console.error("PayPal SDK failed to load.");
-        }
-      };
-
-      script.onerror = () => {
-        console.error("Error loading PayPal SDK script.");
-      };
+      // Create a promise to handle script loading
+      const scriptLoaded = new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+      });
 
       document.body.appendChild(script);
+
+      try {
+        await scriptLoaded;
+        // Wait for PayPal to be available
+        const waitForPayPal = () => {
+          if (window.paypal) {
+            renderPayPalButton();
+          } else {
+            setTimeout(waitForPayPal, 100);
+          }
+        };
+        waitForPayPal();
+      } catch (error) {
+        console.error("Error loading PayPal SDK script:", error);
+      }
     };
 
     const renderPayPalButton = () => {
-      // Add a small delay to ensure PayPal SDK is fully initialized
-      setTimeout(() => {
-        try {
-          if (!window.paypal?.HostedButtons) {
-            console.error("PayPal HostedButtons not available");
-            return;
-          }
-          
-          window.paypal.HostedButtons({
-            hostedButtonId: "9RMHPWNU5VKVN",
-          }).render("#paypal-container-9RMHPWNU5VKVN");
-        } catch (error) {
-          console.error("Error rendering PayPal button:", error);
+      try {
+        if (!window.paypal?.HostedButtons) {
+          console.error("PayPal HostedButtons not available");
+          return;
         }
-      }, 1000); // 1 second delay
+
+        window.paypal
+          .HostedButtons({
+            hostedButtonId: "9RMHPWNU5VKVN",
+          })
+          .render("#paypal-container-9RMHPWNU5VKVN");
+      } catch (error) {
+        console.error("Error rendering PayPal button:", error);
+      }
     };
 
     loadPayPalScript();

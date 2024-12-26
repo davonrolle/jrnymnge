@@ -46,21 +46,33 @@ export default function ContactPage() {
     setSubmitSuccess(false);
     setSubmitError(false);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          subject,
+          message,
+        }),
+      });
 
-    // Simulate success (80% chance) or failure (20% chance)
-    if (Math.random() > 0.2) {
+      if (!response.ok) throw new Error("Failed to send message");
+
       setSubmitSuccess(true);
       setName("");
       setEmail("");
       setSubject("");
       setMessage("");
-    } else {
+    } catch (error) {
       setSubmitError(true);
+      console.error("Error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (
@@ -68,8 +80,8 @@ export default function ContactPage() {
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold">Contact Us</h1>
         <p className="text-muted-foreground">
-          We&apos;re here to help! Whether you have a question, feedback, or need
-          support, don&apos;t hesitate to reach out.
+          We&apos;re here to help! Whether you have a question, feedback, or
+          need support, don&apos;t hesitate to reach out.
         </p>
       </div>
 
@@ -138,8 +150,8 @@ export default function ContactPage() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Success</AlertTitle>
                 <AlertDescription>
-                  Your message has been sent successfully. We&apos;ll get back to you
-                  soon!
+                  Your message has been sent successfully. We&apos;ll get back
+                  to you soon!
                 </AlertDescription>
               </Alert>
             )}
@@ -180,41 +192,10 @@ export default function ContactPage() {
               <p>
                 Hi there! I&apos;m Davon, the developer behind this car rental
                 management app. Feel free to reach out for collaboration, custom
-                requests, or feature feedback. I&apos;m always excited to hear from
-                users and improve the platform!
+                requests, or feature feedback. I&apos;m always excited to hear
+                from users and improve the platform!
               </p>
-              <div className="flex space-x-4">
-                <Link
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="icon">
-                    <Github className="h-4 w-4" />
-                    <span className="sr-only">GitHub</span>
-                  </Button>
-                </Link>
-                <Link
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="icon">
-                    <Linkedin className="h-4 w-4" />
-                    <span className="sr-only">LinkedIn</span>
-                  </Button>
-                </Link>
-                <Link
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="icon">
-                    <Twitter className="h-4 w-4" />
-                    <span className="sr-only">Twitter</span>
-                  </Button>
-                </Link>
-              </div>
+              
             </CardContent>
           </Card>
 

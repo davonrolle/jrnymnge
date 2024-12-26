@@ -10,6 +10,7 @@ import {
   CreditCard,
   MessageCircle,
   Coffee,
+  Loader2,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ export default function Homepage() {
   });
 
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,6 +34,7 @@ export default function Homepage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/waitlist", {
@@ -55,6 +58,8 @@ export default function Homepage() {
     } catch (error) {
       console.error("Error submitting form:", error);
       setMessage("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,7 +79,7 @@ export default function Homepage() {
                     bookings, manage payments, and streamline operations.
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
+                <div className="flex flex-col items-center gap-2 min-[400px]:flex-row justify-center">
                   <Button
                     asChild
                     className="font-bold dark:bg-stone-800 dark:hover:bg-stone-700"
@@ -83,12 +88,14 @@ export default function Homepage() {
                   >
                     <Link href="/features">Learn More</Link>
                   </Button>
+                  <Button className="font-bold " asChild>
+                    <Link href="/preview">Preview</Link>
+                  </Button>
                 </div>
                 <br />
                 <Separator />
-
               </div>
-             <div className="flex justify-center">
+              <div className="flex justify-center">
                 <form
                   id="waitlist-form"
                   onSubmit={handleSubmit}
@@ -153,25 +160,38 @@ export default function Homepage() {
                       onChange={handleChange}
                     />
                   </div>
-                  <Button type="submit" className="w-full font-bold">
-                    Join Waitlist!
+                  <Button
+                    type="submit"
+                    className="w-full font-bold"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Joining...
+                      </>
+                    ) : (
+                      "Join Waitlist!"
+                    )}
                   </Button>
                 </form>
-                </div>
-                <Separator/>
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Love what we&apos;re building? Consider supporting us with a
-                    coffee to keep the momentum going!
-                  </p>
-                  <br />
-                  <Button className="font-bold" asChild size="sm">
-                    <Link href="/donate">Buy Us a Coffee<Coffee /></Link>
-                    
-                  </Button>
-                </div>
+              </div>
+              <Separator />
+              <div className="mt-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Love what we&apos;re building? Consider supporting us with a
+                  coffee to keep the momentum going!
+                </p>
+                <br />
+                <Button className="font-bold" asChild size="sm">
+                  <Link href="/donate">
+                    Buy Us a Coffee
+                    <Coffee />
+                  </Link>
+                </Button>
               </div>
             </div>
+          </div>
         </section>
 
         <section
