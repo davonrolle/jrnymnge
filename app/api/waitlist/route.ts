@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(waitlistEntry, { status: 201 });
-  } catch (error) {
+  } catch (err) {
     return NextResponse.json(
       { error: "Failed to create waitlist entry" },
       { status: 500 }
