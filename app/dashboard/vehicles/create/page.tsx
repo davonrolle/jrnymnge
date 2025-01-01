@@ -42,12 +42,17 @@ const formSchema = z.object({
     .min(1900, "Year must be at least 1900")
     .max(new Date().getFullYear() + 1, "Year cannot exceed next year"),
   dailyRate: z.number().positive("Daily rate must be a positive number"),
+  licensePlate: z.string().optional(),
   status: z.enum(["Available", "Rented", "Maintenance"]),
 });
 
 export default function CreateVehiclePage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [alert, setAlert] = useState<{ title: string; description: string; variant: "default" | "destructive" | null } | null>(null);
+  const [alert, setAlert] = useState<{
+    title: string;
+    description: string;
+    variant: "default" | "destructive" | null;
+  } | null>(null);
   const router = useRouter();
   const { isSignedIn, isLoaded, userId } = useAuth();
 
@@ -58,6 +63,7 @@ export default function CreateVehiclePage() {
       model: "",
       year: new Date().getFullYear(),
       dailyRate: 0,
+      licensePlate: "",
       status: "Available",
     },
   });
@@ -217,6 +223,27 @@ export default function CreateVehiclePage() {
                   </FormControl>
                   <FormDescription>
                     The daily rental rate for this vehicle (in your currency)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="licensePlate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>License Plate</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. ABC123"
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    The vehicle&apos;s license plate number (optional)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

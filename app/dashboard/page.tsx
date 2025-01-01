@@ -1,5 +1,6 @@
-"use client";
-
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,20 +22,68 @@ import {
   ChevronRight,
   AlertTriangle,
 } from "lucide-react";
+async function DashboardOverview() {
+  const session = await auth();
+  const userId = session.userId;
 
-export default function DashboardOverview() {
-  const activeRentals = 42;
-  const upcomingReservations = 15;
-  const dailyRevenue  = 3;
-  const weeklyRevenue = 22800;
-  const monthlyRevenue  = 97500;
-  const rentedVehicles = 42;
-  const availableVehicles  = 28;
-  const maintenanceVehicles = 5;
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
-  const totalVehicles =
-    rentedVehicles + availableVehicles + maintenanceVehicles;
-  const utilizationRate = (rentedVehicles / totalVehicles) * 100;
+  // Fetch user's data
+  const user = await db.user.findUnique({
+    where: { clerkId: userId },
+    include: {
+      vehicles: true,
+      bookings: true,
+      customers: true,
+    },
+  });
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  // Calculate metrics from actual data
+  const activeRentals = user.bookings.filter(
+    (booking) =>
+      new Date(booking.startDate) <= new Date() &&
+      new Date(booking.endDate) >= new Date()
+  ).length;
+
+  const upcomingReservations = user.bookings.filter(
+    (booking) => new Date(booking.startDate) > new Date()
+  ).length;
+
+  // Calculate revenue
+  const calculateRevenue = (days: number) => {
+    const now = new Date();
+    const pastDate = new Date(now.setDate(now.getDate() - days));
+
+    return user.bookings
+      .filter((booking) => new Date(booking.createdAt) >= pastDate)
+      .reduce((sum, booking) => sum + booking.totalAmount, 0);
+  };
+
+  const dailyRevenue = calculateRevenue(1);
+  const weeklyRevenue = calculateRevenue(7);
+  const monthlyRevenue = calculateRevenue(30);
+
+  // Vehicle statistics
+  const rentedVehicles = user.vehicles.filter(
+    (v) => v.status === "Rented"
+  ).length;
+  const availableVehicles = user.vehicles.filter(
+    (v) => v.status === "Available"
+  ).length;
+  const maintenanceVehicles = user.vehicles.filter(
+    (v) => v.status === "Maintenance"
+  ).length;
+
+  const totalVehicles = user.vehicles.length;
+  const utilizationRate = totalVehicles
+    ? (rentedVehicles / totalVehicles) * 100
+    : 0;
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -49,7 +98,7 @@ export default function DashboardOverview() {
       {/* Welcome Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Welcome back, John!</CardTitle>
+          <CardTitle>Welcome back, {user.firstName || "User"}!</CardTitle>
           <CardDescription>
             Here&apos;s an overview of your rental business today.
           </CardDescription>
@@ -249,32 +298,29 @@ export default function DashboardOverview() {
           <CardTitle>Notifications & Alerts</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Maintenance Required</AlertTitle>
-            <AlertDescription>
-              Vehicle BHM2023 is due for scheduled maintenance. Please schedule
-              service as soon as possible.
-            </AlertDescription>
-          </Alert>
-          <Alert>
-            <Bell className="h-4 w-4" />
-            <AlertTitle>New Booking</AlertTitle>
-            <AlertDescription>
-              A new booking has been made for tomorrow. Vehicle: Toyota Camry
-              (BHM2024).
-            </AlertDescription>
-          </Alert>
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Payment Failure</AlertTitle>
-            <AlertDescription>
-              Payment for booking #12345 has failed. Please contact the customer
-              to resolve the issue.
-            </AlertDescription>
-          </Alert>
+          {user.vehicles.some((v) => v.status === "Maintenance") && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Maintenance Required</AlertTitle>
+              <AlertDescription>
+                You have {maintenanceVehicles} vehicle(s) requiring maintenance.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {upcomingReservations > 0 && (
+            <Alert>
+              <Bell className="h-4 w-4" />
+              <AlertTitle>Upcoming Bookings</AlertTitle>
+              <AlertDescription>
+                You have {upcomingReservations} upcoming reservations.
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
+
+export default DashboardOverview;

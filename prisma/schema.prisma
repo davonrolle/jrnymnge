@@ -53,11 +53,13 @@ model Vehicle {
 
 model Booking {
   id               String    @id @default(cuid())
-  tempName    String?
+  tempName         String?
+  tempEmail        String?
+  tempPhone        String?
   vehicleBooked    String
   vehicleId        String
   userId           String
-  customerId       String?   // Allow customerId to be nullable
+  customerId       String?
   startDate        DateTime
   endDate          DateTime
   totalAmount      Float
@@ -78,11 +80,12 @@ model Booking {
 
 model Customer {
   id            String    @id @default(cuid())
-  firstName          String?
+  firstName     String?
   lastName      String?
   email         String    @unique
   phone         String?
   totalBookings Int       @default(0)
+  totalSpent    Float     @default(0)
   status        String    @default("Active")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

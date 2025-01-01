@@ -1,28 +1,136 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
+import { addDays } from "date-fns";
+import { updateCustomerStatus } from "@/app/dashboard/customers/customerStatus";
 
 const prisma = new PrismaClient();
 
 // Handle GET requests - Fetch bookings for the current user
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const user = await currentUser(); // Get the current user from Clerk
+    const user = await currentUser();
+    const isNotifications =
+      req.nextUrl.searchParams.get("notifications") === "true";
+    const bookingId = req.nextUrl.searchParams.get("id");
 
     if (!user || !user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Query bookings where the userId matches the user's Clerk ID
+    // Get the user's database ID
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // If a specific booking ID is provided, return that booking's details
+    if (bookingId) {
+      const booking = await prisma.booking.findFirst({
+        where: {
+          id: bookingId,
+          userId: dbUser.id,
+        },
+        include: {
+          vehicle: {
+            select: {
+              make: true,
+              model: true,
+              year: true,
+              dailyRate: true,
+            },
+          },
+          customer: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (!booking) {
+        return NextResponse.json(
+          { error: "Booking not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(booking);
+    }
+
+    // If this is a notifications request, return only upcoming bookings within 5 days
+    if (isNotifications) {
+      const upcomingBookings = await prisma.booking.findMany({
+        where: {
+          userId: dbUser.id,
+          startDate: {
+            gte: new Date(),
+            lte: addDays(new Date(), 5),
+          },
+        },
+        include: {
+          vehicle: {
+            select: {
+              make: true,
+              model: true,
+              year: true,
+              dailyRate: true,
+            },
+          },
+          customer: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          startDate: "asc",
+        },
+      });
+
+      return NextResponse.json(upcomingBookings, { status: 200 });
+    }
+
+    // Original GET logic for all bookings
     const bookings = await prisma.booking.findMany({
-      where: { userId: user.id },
+      where: {
+        userId: dbUser.id,
+      },
+      include: {
+        customer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        vehicle: {
+          select: {
+            make: true,
+            model: true,
+            year: true,
+            dailyRate: true,
+            status: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(bookings, { status: 200 });
-  } catch {
-    console.error("Error fetching bookings");
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -35,69 +143,86 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Read and parse the request body
+    // Get or create the database user
+    let dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId: user.id,
+          email: user.emailAddresses[0]?.emailAddress || "",
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          imageUrl: user.imageUrl || "",
+        },
+      });
+    }
+
     const body = await req.text();
-    if (!body) {
-      return NextResponse.json({ error: "Request body cannot be empty" }, { status: 400 });
+    const parsedBody = JSON.parse(body);
+
+    // Check if vehicle is available before booking
+    const vehicle = await prisma.vehicle.findUnique({
+      where: { id: parsedBody.vehicleId },
+    });
+
+    if (!vehicle || vehicle.status !== "Available") {
+      return NextResponse.json(
+        { error: "Vehicle is not available for booking" },
+        { status: 400 }
+      );
     }
 
-    let parsedBody: {
-      vehicleId: string;
-      vehicleBooked: string;
-      startDate: string;
-      endDate: string;
-      totalAmount: number;
-      pickupLocation?: string;
-      dropoffLocation?: string;
-      specialRequests?: string;
-      insurance?: string;
-      mileagePolicy?: string;
-      fuelPolicy?: string;
-      tempName?: string;
-    };
-    try {
-      parsedBody = JSON.parse(body);
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON format" }, { status: 400 });
-    }
-
-    const {
-      vehicleId,
-      vehicleBooked,
-      startDate,
-      endDate,
-      totalAmount,
-      pickupLocation,
-      dropoffLocation,
-      specialRequests,
-      insurance,
-      mileagePolicy,
-      fuelPolicy,
-      tempName,
-    } = parsedBody;
-
-    // Validate required fields
-    if (!vehicleId || !startDate || !endDate || !totalAmount) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    // Create the booking
+    // Create the booking with the user's ID
     const booking = await prisma.booking.create({
       data: {
-        vehicleBooked,
-        tempName,
-        userId: user.id, // Use user.id to associate the booking with the user
-        vehicleId,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        totalAmount,
-        pickupLocation: pickupLocation || "Not Provided",
-        dropoffLocation: dropoffLocation || "Not Provided",
-        specialRequests: specialRequests || null,
-        insurance: insurance || null,
-        mileagePolicy: mileagePolicy || null,
-        fuelPolicy: fuelPolicy || null,
+        vehicleBooked: parsedBody.vehicleBooked,
+        tempName: parsedBody.tempName,
+        tempEmail: parsedBody.tempEmail,
+        tempPhone: parsedBody.tempPhone,
+        userId: dbUser.id,
+        vehicleId: parsedBody.vehicleId,
+        startDate: new Date(parsedBody.startDate),
+        endDate: new Date(parsedBody.endDate),
+        totalAmount: parsedBody.totalAmount,
+        pickupLocation: parsedBody.pickupLocation || "Not Provided",
+        dropoffLocation: parsedBody.dropoffLocation || "Not Provided",
+        specialRequests: parsedBody.specialRequests || null,
+        insurance: parsedBody.insurance || null,
+        mileagePolicy: parsedBody.mileagePolicy || null,
+        fuelPolicy: parsedBody.fuelPolicy || null,
+        ...(parsedBody.customerId && { customerId: parsedBody.customerId }),
       },
+    });
+
+    // If there's a customer ID, update their statistics
+    if (parsedBody.customerId) {
+      await prisma.$transaction([
+        prisma.customer.update({
+          where: { id: parsedBody.customerId },
+          data: {
+            totalBookings: {
+              increment: 1,
+            },
+          },
+        }),
+        prisma.customer.update({
+          where: { id: parsedBody.customerId },
+          data: {
+            totalSpent: {
+              increment: parseFloat(parsedBody.totalAmount),
+            },
+          },
+        }),
+      ]);
+    }
+
+    // Update vehicle status to "Rented" when booking is created
+    await prisma.vehicle.update({
+      where: { id: parsedBody.vehicleId },
+      data: { status: "Rented" },
     });
 
     return NextResponse.json(booking, { status: 201 });
@@ -106,17 +231,22 @@ export async function POST(req: NextRequest) {
     console.error("Error creating booking:", error?.message || err);
 
     if (error?.code === "P2002") {
-      return NextResponse.json({ error: "A booking with similar details already exists" }, { status: 400 });
+      return NextResponse.json(
+        { error: "A booking with similar details already exists" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 // Handle DELETE requests - Delete a booking by ID
 export async function DELETE(req: NextRequest) {
   try {
-    // Check if the user is authenticated
     const user = await currentUser();
 
     if (!user || !user.id) {
@@ -127,21 +257,34 @@ export async function DELETE(req: NextRequest) {
     const id = req.nextUrl.searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Booking ID is required" },
+        { status: 400 }
+      );
     }
 
-    // Check if the booking exists
-    const booking = await prisma.booking.findUnique({
-      where: { id },
+    // Get the user's database ID
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Check if the booking exists and belongs to the user
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id: id,
+        userId: dbUser.id,
+      },
     });
 
     if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-    }
-
-    // Check if the booking belongs to the user
-    if (booking.userId !== user.id) {
-      return NextResponse.json({ error: "Booking not found or unauthorized" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Booking not found or unauthorized" },
+        { status: 404 }
+      );
     }
 
     // Delete the booking
@@ -149,9 +292,123 @@ export async function DELETE(req: NextRequest) {
       where: { id },
     });
 
-    return NextResponse.json({ message: "Booking deleted successfully" }, { status: 200 });
-  } catch {
-    console.error("Error deleting booking.");
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // Update customer statistics if applicable
+    if (booking?.customerId) {
+      await prisma.customer.update({
+        where: { id: booking.customerId },
+        data: {
+          totalBookings: { decrement: 1 },
+          totalSpent: { decrement: booking.totalAmount },
+        },
+      });
+    }
+
+    // Update vehicle status back to "Available" when booking is deleted
+    if (booking?.vehicleId) {
+      await prisma.vehicle.update({
+        where: { id: booking.vehicleId },
+        data: { status: "Available" },
+      });
+    }
+
+    return NextResponse.json(
+      { message: "Booking deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await currentUser();
+
+    if (!user || !user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Booking ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get the user's database ID
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Verify the booking belongs to the user
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id: id,
+        userId: dbUser.id,
+      },
+    });
+
+    if (!booking) {
+      return NextResponse.json(
+        { error: "Booking not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // Update the booking with all fields
+    const updatedBooking = await prisma.booking.update({
+      where: { id: id },
+      data: {
+        startDate: new Date(updateData.startDate),
+        endDate: new Date(updateData.endDate),
+        pickupLocation: updateData.pickupLocation,
+        dropoffLocation: updateData.dropoffLocation,
+        specialRequests: updateData.specialRequests,
+        insurance: updateData.insurance,
+        mileagePolicy: updateData.mileagePolicy,
+        fuelPolicy: updateData.fuelPolicy,
+        totalAmount: updateData.totalAmount,
+      },
+      include: {
+        customer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        vehicle: {
+          select: {
+            make: true,
+            model: true,
+            year: true,
+          },
+        },
+      },
+    });
+
+    // Update customer status after booking modification
+    if (updatedBooking.customerId) {
+      await updateCustomerStatus(updatedBooking.customerId);
+    }
+
+    return NextResponse.json(updatedBooking);
+  } catch (error) {
+    console.error("Error updating booking:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
